@@ -54,6 +54,13 @@ node /srv/approver.mjs &
 node /app/openclaw.mjs gateway --bind lan --allow-unconfigured --port "${OPENCLAW_GATEWAY_PORT}" &
 
 wait -n || true
+# Record kernel memory-kill counters before teardown; never print environment values.
+for memory_counter in /sys/fs/cgroup/memory.events /sys/fs/cgroup/memory.max /sys/fs/cgroup/memory.peak; do
+  if [ -r "$memory_counter" ]; then
+    echo "openclaw-railway: diagnostic $memory_counter"
+    cat "$memory_counter" || true
+  fi
+done
 echo "openclaw-railway: a component exited; stopping container for restart"
 kill -TERM 0 2>/dev/null || true
 wait 2>/dev/null || true

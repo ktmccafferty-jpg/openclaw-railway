@@ -11,7 +11,7 @@
 	# is what keeps device pairing required rather than loopback auto-approved).
 	servers {
     trusted_proxies static 100.64.0.0/10 fd00::/8
-        trusted_proxies_strict
+    trusted_proxies_strict
   }
 }
 

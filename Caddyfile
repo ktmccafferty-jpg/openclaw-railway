@@ -18,7 +18,11 @@
 :{$PORT:8080} {
 	# Bare "/" goes to the approver, which redirects first-time (unpaired) visitors
 	# to /setup and everyone else on to the Control UI.
-	@root path /
+	# WebSocket upgrades must reach the gateway, never the HTTP redirect helper.
+	@root {
+		path /
+		not header Upgrade websocket
+	}
 	handle @root {
 		reverse_proxy 127.0.0.1:{$APPROVER_PORT:9090}
 	}

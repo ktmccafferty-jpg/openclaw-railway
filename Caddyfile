@@ -10,8 +10,8 @@
 	# are preserved end to end (and the gateway keeps seeing a remote client, which
 	# is what keeps device pairing required rather than loopback auto-approved).
 	servers {
-		trusted_proxies static 100.64.0.0/10 fd00::/8
-	}
+    trusted_proxies static 100.64.0.0/10 fd00::/8
+    trusted_proxies_strict
 }
 
 :{$PORT:8080} {
@@ -30,7 +30,9 @@
 	# Everything else — Control UI, API, health, and WebSocket — to the gateway.
 	handle {
 		reverse_proxy 127.0.0.1:{$OPENCLAW_GATEWAY_PORT:8081} {
-			header_up Host {host}
-		}
+    header_up Host {host}
+    header_up X-Forwarded-For {client_ip}
+    header_up -X-Real-IP
+}
 	}
 }

@@ -40,6 +40,15 @@ term() { trap - TERM INT; echo "openclaw-railway: shutting down"; kill -TERM 0 2
 trap term TERM INT
 
 echo "openclaw-railway: caddy(:${PORT:-8080}) + approver(:${APPROVER_PORT}) + gateway(:${OPENCLAW_GATEWAY_PORT})"
+# Trust only the same-container Caddy reverse proxy.
+# Keep gateway token authentication and device pairing enabled.
+if node /app/openclaw.mjs config set gateway.trustedProxies \
+  '["127.0.0.1","::1"]' --strict-json; then
+  echo "openclaw-railway: local Caddy proxy trusted"
+else
+  echo "openclaw-railway: could not configure trusted proxies" >&2
+  exit 1
+fi
 caddy run --config /srv/Caddyfile --adapter caddyfile &
 node /srv/approver.mjs &
 node /app/openclaw.mjs gateway --bind lan --allow-unconfigured --port "${OPENCLAW_GATEWAY_PORT}" &
